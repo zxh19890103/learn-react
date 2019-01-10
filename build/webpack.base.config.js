@@ -17,7 +17,7 @@ module.exports = {
     path: util.resolve('./dist')
   },
   resolve: {
-    extensions: [ '.jsx', '.js', '.json' ]
+    extensions: [ '.jsx', '.js' ]
   },
   module: {
     rules: [
@@ -63,7 +63,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new CleanWebpackPlugin(['./dist']),
+    new CleanWebpackPlugin([util.resolve('./dist')]),
     new HtmlWebpackPlugin({
       template: './index.html',
       filename: 'index.html'
