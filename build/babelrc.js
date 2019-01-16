@@ -3,6 +3,7 @@ module.exports = {
   "ignore": ["third_party"],
   "plugins": [
     '@babel/plugin-transform-runtime',
-    '@babel/plugin-syntax-dynamic-import'
+    '@babel/plugin-syntax-dynamic-import',
+    'babel-plugin-transform-class-properties'
   ]
 }

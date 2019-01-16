@@ -7,9 +7,12 @@ export class Com extends React.Component {
   render() {
     const { name, age } = this.props
     return (
-    <p>
-      This author's name is {name}, and his age is {age}
-    </p>
+      <>
+      <h5>Class Component</h5>
+      <p>
+        This author's name is {name}, and his age is {age}
+      </p>
+    </>
     )
   }
 }
