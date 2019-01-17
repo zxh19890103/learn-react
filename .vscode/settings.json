@@ -1,0 +1,8 @@
+{
+    "editor.fontSize": 24,
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.cache-loader": true,
+      "**/yarn-error.log": true
+    }
+}
