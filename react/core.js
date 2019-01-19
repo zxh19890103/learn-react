@@ -19,8 +19,7 @@ const elementFactory = (type, props, elementType) => {
     $$typeof: REACT_ELEMENT_TYPE,
     type,
     props,
-    elementType,
-    __html: []
+    elementType
   }
   return element
 }
@@ -43,21 +42,11 @@ function createElement(type, config, ...children) {
   }
 }
 
-function renderHTML(element) {
+function executeComponent(element) {
   const { type, elementType, props } = element
   switch (elementType) {
     case 'tag': {
-      const hostElement = document.createElement(type)
-      let propName = null
-      for (propName in props) {
-        if (propName === 'children') continue
-        if (propName in hostElement) {
-          hostElement[propName] = props[propName]
-        } else {
-          hostElement.setAttribute(propName, props[propName])
-        }
-      }
-      return hostElement
+      return null
     }
     case 'component': {
       const instance = new type(props)
@@ -71,27 +60,60 @@ function renderHTML(element) {
 
 /**
  *
- * @param {*} element React Element
- * @param {*} container DOM container
- * @param {*} action How to mount on container
  */
-function walk(element) {
+function walk(node) {
+  const { element } = node
   if (element.$$typeof === REACT_ELEMENT_TYPE) {
-    // const html = renderHTML(element)
-    const children = element.props.children
-    children.forEach(walk)
-  } else {
-    const text = document.createTextNode(element)
-    element.__html.push(text)
+    const subTree = executeComponent(element)
+    if (subTree !== null) {
+      node.child = {
+        element: subTree
+      }
+      walk(node.child)
+    }
   }
 }
 
-function render(rootInstance, hostElement) {
-  walk(rootInstance)
+function build(rootElement) {
+  const virtualDOM = {
+    root: {
+      element: rootElement
+    }
+  }
+  walk(virtualDOM.root)
+  return virtualDOM
+}
+
+function renderNode(node) {
+  const { element, child } = node
+  const { elementType, props, type } = element
+  if (elementType === 'tag') {
+    const hostElement = document.createElement(type)
+    let propName = null
+    for (propName in props) {
+      // props.children.forEach(child)
+      if (propName in hostElement) {
+        hostElement[propName] = props[propName]
+      } else {
+        hostElement.setAttribute(propName, props[propName])
+      }
+    }
+  } else if (elementType === 'function') {
+
+  } else if (elementType === 'component') {
+
+  }
+}
+
+function render(rootElement, hostElement) {
+  const dom = build(rootElement)
+  // const { root } = dom
+  // renderElement()
 }
 
 export {
   Component,
   createElement,
+  build,
   render
 }
