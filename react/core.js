@@ -19,6 +19,7 @@ const elementFactory = (type, props, children, elementType) => {
   const element = {
     $$typeof: REACT_ELEMENT_TYPE,
     $$return: null,
+    $$el: null,
     type,
     props,
     children,
@@ -86,6 +87,7 @@ function mountElement(element, mountTo) {
         }
       }
       mountTo.appendChild(hostElement)
+      element.$$el = hostElement
       children.forEach((subElement) => {
         mountElement(subElement, hostElement)
       })
