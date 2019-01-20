@@ -1,12 +1,14 @@
 import {
   fiberTree,
-  FiberNode
+  FiberNode,
+  workLoop
 } from './fiber'
 
 import {
   isValidDOMElement,
   isValidReactElement,
-  REACT_ELEMENT_TYPE
+  REACT_ELEMENT_TYPE,
+  REACT_FUNCTION_ELEMENT
 } from './is'
 
 class Component {
@@ -25,13 +27,19 @@ class Component {
 }
 
 const elementFactory = (type, props, children, elementType) => {
+  const flatChildren = []
+  children.forEach(child => {
+    if (child instanceof Array) {
+      flatChildren.push(...child)
+    } else {
+      flatChildren.push(child)
+    }
+  })
   const element = {
     $$typeof: REACT_ELEMENT_TYPE,
-    $$return: null,
-    $$el: null,
     type,
     props,
-    children,
+    children: flatChildren,
     elementType,
   }
   return element
@@ -54,29 +62,48 @@ function createElement(type, config, ...children) {
   }
 }
 
-function executeComponent(element) {
+function getElementInstance(element) {
   const { type, elementType, props, children } = element
   switch (elementType) {
     case 'tag': {
-      return null
+      const hostElement = document.createElement(type)
+      let propName = null
+      for (propName in props) {
+        if (propName in hostElement) {
+          hostElement[propName] = props[propName]
+        } else {
+          hostElement.setAttribute(propName, props[propName])
+        }
+      }
+      return hostElement
     }
     case 'component': {
       const instance = new type(props, children)
-      return instance.render()
+      return instance
     }
     case 'function': {
-      return type(props, children)
+      return REACT_FUNCTION_ELEMENT
     }
   }
+  return null
 }
 
-function walk(element, fiberNode) {
-  if (isValidReactElement(element)) {
-    fiberNode.stateNode = element
+/**
+ * Make the tree of React Elements
+ * Make the tree of Fiber nodes
+ */
+function ________walk(element, fiberNode) {
+  if (!isValidReactElement(element)) return
+  const instance = getElementInstance(element)
+  // if element type is Function, instance is null.
+  fiberNode.stateNode = instance
+  if (element.elementType === 'tag') {
+    // should travel children of element if it's a host element
+    // or, it depends on whether the developer render children in the JXS template
     const { children } = element
     const validReactNodes = children.filter(isValidReactElement)
     const L = validReactNodes.length
-    if (L >0) {
+    if (L > 0) {
       const fiberChildNodes = validReactNodes.map(() => {
         const newFiberNode =  new FiberNode(null, null, fiberNode)
         return newFiberNode
@@ -93,64 +120,63 @@ function walk(element, fiberNode) {
         walk(child, fiberChildNode)
       }
     }
-    const $$return = executeComponent(element)
-    if ($$return !== null) {
-      element.$$return = $$return
-      const fiberChildNode = new FiberNode(null, null, fiberNode)
-      walk($$return, fiberChildNode)
-    }
-  }
-}
-
-function mountElement(element, mountTo) {
-  if (isValidReactElement(element)) {
-    const { elementType, props, type, children } = element
-    if (elementType === 'tag') {
-      const hostElement = document.createElement(type)
-      let propName = null
-      for (propName in props) {
-        if (propName in hostElement) {
-          hostElement[propName] = props[propName]
-        } else {
-          hostElement.setAttribute(propName, props[propName])
-        }
-      }
-      mountTo.appendChild(hostElement)
-      element.$$el = hostElement
-      children.forEach((subElement) => {
-        mountElement(subElement, hostElement)
-      })
-    } else {
-      const $$return = element.$$return
-      if ($$return !== null) {
-        mountElement($$return, mountTo)
-      }
-    }
   } else {
-    const typeofExpr = typeof element
-    if (typeofExpr === 'object') {
-      if (element instanceof Array) {
-        element.forEach((el) => {
-          mountElement(el, mountTo)
-        })
-      } else {
-        console.log('What else will it be ?')
-      }
-    } else if (typeofExpr === 'string') {
-      const text = document.createTextNode(element)
-      mountTo.appendChild(text)
+    // what the function return or the method render return is the child of the React Element.
+    let _return = null
+    if (element.elementType === 'component') {
+      _return = instance.render()
+    } else {
+      const { type, props, children } = element
+      _return = type(props, children)
     }
+    const fiberChildNode = new FiberNode(null, null, fiberNode)
+    walk(_return, fiberChildNode)
   }
 }
 
 function render(rootElement, hostElement) {
-  walk(rootElement, fiberTree)
-  mountElement(rootElement, hostElement)
+  fiberTree.root.element = rootElement
+  fiberTree.$$container = hostElement
+  workLoop(fiberTree.root, buildFiberTree)
   console.log(fiberTree)
 }
 
 function Fragment(props, children) {
-  return children
+  throw new Error('Fragment is not implemented')
+}
+
+function buildFiberTree(fiberNode) {
+  const { element } = fiberNode
+  if (!isValidReactElement(element)) return
+  const instance = getElementInstance(element)
+  fiberNode.stateNode = instance
+  const elementType = element.elementType
+  if (elementType === 'tag') {
+    const { children } = element
+    const validReactElements = children.filter(isValidReactElement)
+    const L = validReactElements.length
+    if (L === 0) return
+    const fiberChildNodes = validReactElements.map(child => {
+      return new FiberNode(null, null, fiberNode, child)
+    })
+    fiberNode.child = fiberChildNodes[0]
+    let fiberChildNode = null
+    for (let i = 0; i < L; i ++) {
+      fiberChildNode = fiberChildNodes[i]
+      if (i < L -1) {
+        fiberChildNode.sibling = fiberChildNodes[i + 1]
+      }
+    }
+  } else if (elementType === 'component') {
+    const _return = fiberNode.stateNode.render()
+    const fiberChildNode = new FiberNode(null, null, fiberNode, _return)
+    fiberNode.child = fiberChildNode
+  } else {
+    const { props, children, type } = fiberNode.element
+    const _return = type(props, children)
+    const fiberChildNode = new FiberNode(null, null, fiberNode, _return)
+    fiberNode.child = fiberChildNode
+  }
 }
 
 export {
