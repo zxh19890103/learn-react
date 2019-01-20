@@ -1,4 +1,4 @@
-import * as React from './core'
+// import * as React from './core'
 
 const HelloWorld = (props) => {
   const { title, children } = props
@@ -11,10 +11,6 @@ const HelloWorld = (props) => {
   </div>
 }
 
-const element =
-<HelloWorld title={'Hey'}>
-  <a href="https://jd.com">JD</a>
-</HelloWorld>
-
-const vn = React.render(element)
-console.log(vn)
+const element = <HelloWorld title={'Hey'}/>
+// React.render(element, document.getElementById('reactApp'))
+console.log(element)
