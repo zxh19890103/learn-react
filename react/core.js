@@ -1,4 +1,13 @@
-const REACT_ELEMENT_TYPE = Symbol('React Element')
+import {
+  fiberTree,
+  FiberNode
+} from './fiber'
+
+import {
+  isValidDOMElement,
+  isValidReactElement,
+  REACT_ELEMENT_TYPE
+} from './is'
 
 class Component {
   constructor(props, children) {
@@ -61,20 +70,40 @@ function executeComponent(element) {
   }
 }
 
-function walk(element) {
-  if (element.$$typeof === REACT_ELEMENT_TYPE) {
+function walk(element, fiberNode) {
+  if (isValidReactElement(element)) {
+    fiberNode.stateNode = element
     const { children } = element
-    children.forEach(walk)
+    const validReactNodes = children.filter(isValidReactElement)
+    const L = validReactNodes.length
+    if (L >0) {
+      const fiberChildNodes = validReactNodes.map(() => {
+        const newFiberNode =  new FiberNode(null, null, fiberNode)
+        return newFiberNode
+      })
+      fiberNode.child = fiberChildNodes[0]
+      let child = null
+      let fiberChildNode = null
+      for (let i = 0; i < L; i ++) {
+        child = validReactNodes[i]
+        fiberChildNode = fiberChildNodes[i]
+        if (i < L -1) {
+          fiberChildNode.sibling = fiberChildNodes[i + 1]
+        }
+        walk(child, fiberChildNode)
+      }
+    }
     const $$return = executeComponent(element)
     if ($$return !== null) {
       element.$$return = $$return
-      walk($$return)
+      const fiberChildNode = new FiberNode(null, null, fiberNode)
+      walk($$return, fiberChildNode)
     }
   }
 }
 
 function mountElement(element, mountTo) {
-  if (element.$$typeof === REACT_ELEMENT_TYPE) {
+  if (isValidReactElement(element)) {
     const { elementType, props, type, children } = element
     if (elementType === 'tag') {
       const hostElement = document.createElement(type)
@@ -115,12 +144,18 @@ function mountElement(element, mountTo) {
 }
 
 function render(rootElement, hostElement) {
-  walk(rootElement)
+  walk(rootElement, fiberTree)
   mountElement(rootElement, hostElement)
+  console.log(fiberTree)
+}
+
+function Fragment(props, children) {
+  return children
 }
 
 export {
   Component,
+  Fragment,
   createElement,
   render
 }

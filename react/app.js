@@ -13,19 +13,21 @@ const HelloWorld = (props, children) => {
 
 class Bird extends React.Component {
   render() {
-    return <HelloWorld title={'Hahahaha'}></HelloWorld>
+    return <>
+      <HelloWorld title={'Hahahaha'}></HelloWorld>
+      <p style="color: cyan;">
+        Hooks are an upcoming feature that lets you use state and other React features without writing a class. They’re currently in React v16.8.0-alpha.0.
+      </p>
+    </>
   }
 }
 
-const element = <div>
+const rootElement = <div>
   <HelloWorld title={'Hey'}>
     <div style="color: red" className="goof" name="Singhi John">Hello, Child</div>
-    <Bird/>
-    <Bird/>
-    <Bird/>
     <Bird/>
   </HelloWorld>
 </div>
 
-React.render(element, document.getElementById('reactApp'))
-console.log(element)
+React.render(rootElement, document.getElementById('reactApp'))
+console.log(rootElement)
