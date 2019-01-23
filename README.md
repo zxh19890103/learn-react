@@ -10,7 +10,7 @@ A project to learn react deeply. Know it's principle and use it later.
 6. Use yarn, not npm.
 
 ## Code
-```
+```javascript
 class ReactRoot
 	_internalRoot
 	render(children, callback): Work
@@ -76,7 +76,7 @@ createUpdate()
 
 ### enqueueUpdate(fiber, update)
 
-See [./enqueueUpdate.md]
+See [enqueueUpdate.md]
 
 ### scheduleWork(fiber, expirationTime)
-See [./scheduleWork.md]
+See [scheduleWork.md]
