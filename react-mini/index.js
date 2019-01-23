@@ -13,10 +13,18 @@ function Phone(props) {
   </div>
 }
 
-const element = <Phone>
+const element = [<Phone key="phone">
   <p>It's just a Phone.</p>
-</Phone>
+</Phone>, <h3 key="node">Hello, H3</h3>]
 
-ReactDom.render(element, document.getElementById('reactApp'))
+const container = document.getElementById('reactApp')
+ReactDom.render(element, container)
 
 console.log(element)
+const reactRoot = container._reactRootContainer
+
+console.log('ReactDom', ReactDom)
+const internalRoot = reactRoot._internalRoot
+console.log(internalRoot)
+const fiberNode = internalRoot.current
+console.log(fiberNode)
