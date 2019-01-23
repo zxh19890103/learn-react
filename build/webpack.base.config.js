@@ -10,7 +10,7 @@ const babelRC = require('./babelrc')
 module.exports = {
   context: util.resolve(),
   entry: {
-    app: './react/index'
+    app: './react-mini/index'
   },
   output: {
     filename: "[name].[hash:7].js",
