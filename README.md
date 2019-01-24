@@ -39,7 +39,7 @@ class ReactWork
 	then()
 	_onCommit()
 
-object ReactDom
+Object ReactDom
   render(children, container, callback)
     - legacyRenderSubtreeIntoContainer(
         parentComponent: ?React$Component<any, any>,
