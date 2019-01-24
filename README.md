@@ -16,7 +16,7 @@ class ReactRoot
 	render(children, callback): Work
 	unmount(callback): Work
 	legacy_renderSubtreeIntoContainer(parentComponent, children, callback): Work
-	createBatch() ReactBatch
+	createBatch(): ReactBatch
 
 class ReactBatch
 	_expirationTime
@@ -40,27 +40,27 @@ class ReactWork
 	_onCommit()
 
 object ReactDom
-		render(children, container, callback)
-			- legacyRenderSubtreeIntoContainer(
-          parentComponent: ?React$Component<any, any>,
-          children: ReactNodeList,
-          container: DOMContainer,
-          forceHydrate: boolean,
-          callback: ?Function,
-				)
-          - ReactRoot.render(children, callback)
-            - updateContainer(children, ReactRoot._internalRoot, null, work._onCommit)
-              - updateContainerAtExpirationTime(element, container, parentComponent, expirationTime, callback)
-                - scheduleRootUpdate(current Fiber, element, expirationTime, callback)
-                  - createUpdate(expirationTime) with payload = {element}
-                  - flushPassiveEffects()
-                  - enqueueUpdate(current, update) ***
-                  - scheduleWork(current, expirationTime)
-                    - scheduleWorkToRoot(fiber, expirationTime) ***
+  render(children, container, callback)
+    - legacyRenderSubtreeIntoContainer(
+        parentComponent: ?React$Component<any, any>,
+        children: ReactNodeList,
+        container: DOMContainer,
+        forceHydrate: boolean,
+        callback: ?Function,
+      )
+      - ReactRoot.render(children, callback)
+        - updateContainer(children, ReactRoot._internalRoot, null, work._onCommit)
+          - updateContainerAtExpirationTime(element, container, parentComponent, expirationTime, callback)
+            - scheduleRootUpdate(current Fiber, element, expirationTime, callback)
+              - createUpdate(expirationTime) with payload = {element}
+              - flushPassiveEffects()
+              - enqueueUpdate(current, update) ***
+              - scheduleWork(current, expirationTime)
+                - scheduleWorkToRoot(fiber, expirationTime) ***
 ```
 
-```
-createUpdate()
+```javascript
+function createUpdate()
 {
     expirationTime: expirationTime,
 
@@ -79,4 +79,5 @@ createUpdate()
 See [enqueueUpdate.md]
 
 ### scheduleWork(fiber, expirationTime)
+
 See [scheduleWork.md]
