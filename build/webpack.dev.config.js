@@ -8,6 +8,9 @@ const cfg = require('./config').dev
 module.exports = merge(baseConfig, {
   mode: 'development',
   devtool: "#cheap-module-eval-source-map",
+  externals: {
+    React: 'window.React'
+  },
   module: {
     rules: [
       {

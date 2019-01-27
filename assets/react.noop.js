@@ -5,5 +5,7 @@ var React = {
       props,
       children
     }
+  },
+  Component: function(props) {
   }
 }
