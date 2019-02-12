@@ -1,13 +1,8 @@
 import * as React from 'react'
-const val = import('./remote-component')
-const RemoteView = React.lazy(() => new Promise((resolve) => {
-  setTimeout(() => {
-    val.then(resolve)
-  }, 3000)
-}))
+const RemoteComponent = React.lazy(() => import('./remote-component'));
 
 export default (props) => {
   return <div>
-    <RemoteView name={props.name}/>
+    <RemoteComponent name={props.name}/>
   </div>
 }
